@@ -1,6 +1,6 @@
 // app.js — Yapper frontend logic
 
-const WS_URL = `ws://${location.host}/ws`;
+const WS_URL = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`;
 let ws = null;
 let mediaRecorder = null;
 let audioChunks = [];
