@@ -38,7 +38,7 @@ def ping() -> bool:
     """Check if Whisper server is reachable."""
     try:
         with httpx.Client(timeout=5.0) as client:
-            r = client.get(f"{WHISPER_URL}/docs")
+            r = client.get(f"{WHISPER_URL}/docs", follow_redirects=True)
             return r.status_code == 200
     except Exception:
         return False
