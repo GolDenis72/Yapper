@@ -265,7 +265,7 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
 
 async def run_ws_assessment(ws: WebSocket, send, profile: dict):
     """Run assessment over WebSocket."""
-    from pedagogy.prompts import ASSESSMENT_PROMPT
+    from pedagogy.assessment import ASSESSMENT_PROMPT
     topics = ", ".join(profile.get("preferred_topics", [])[:3]) or "general topics"
     professional = ", ".join(profile.get("professional_topics", [])) or "none"
 
