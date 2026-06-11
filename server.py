@@ -323,4 +323,18 @@ async def run_ws_assessment(ws: WebSocket, send, profile: dict):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server:app", host="0.0.0.0", port=7860, reload=False)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ssl-certfile", default=None)
+    parser.add_argument("--ssl-keyfile", default=None)
+    parser.add_argument("--port", type=int, default=7860)
+    args = parser.parse_args()
+
+    uvicorn.run(
+        "server:app",
+        host="0.0.0.0",
+        port=args.port,
+        reload=False,
+        ssl_certfile=args.ssl_certfile,
+        ssl_keyfile=args.ssl_keyfile,
+    )
