@@ -3,10 +3,10 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from core.llm import chat
-from config.settings import PLANS_DIR
-from pedagogy.prompts import build_analysis_prompt, build_lesson_plan_prompt
-from pedagogy.error_tracker import (
+from server.core.llm import chat
+from server.config.settings import PLANS_DIR
+from server.pedagogy.prompts import build_analysis_prompt, build_lesson_plan_prompt
+from server.pedagogy.error_tracker import (
     load_recent_errors, get_recurring_errors,
     load_vocab_gaps, load_discovered_topics
 )
@@ -125,7 +125,7 @@ def format_plan_for_prompt(plan: dict) -> str:
 
 
 def _save_analysis(student_name: str, topic: str, analysis: dict) -> Path:
-    from config.settings import ERRORS_DIR
+    from server.config.settings import ERRORS_DIR
     analysis_dir = ERRORS_DIR.parent / "analysis"
     analysis_dir.mkdir(parents=True, exist_ok=True)
     filename = f"{datetime.now().strftime('%Y%m%d_%H%M')}_{student_name}.json"
@@ -146,7 +146,7 @@ def _save_plan(student_name: str, plan: dict) -> Path:
 
 
 def _load_last_analysis(student_name: str) -> dict | None:
-    from config.settings import ERRORS_DIR
+    from server.config.settings import ERRORS_DIR
     analysis_dir = ERRORS_DIR.parent / "analysis"
     if not analysis_dir.exists():
         return None
