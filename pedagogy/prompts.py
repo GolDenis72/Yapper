@@ -30,12 +30,12 @@ Lesson plan for today:
 
 Error tracking:
 When you notice a grammatical error, add a note at the END of your response in this format (invisible to student):
-[ERROR: type={error_type}, original="{what_they_said}", correct="{correct_form}"]
+[ERROR: type={{error_type}}, original="{{what_they_said}}", correct="{{correct_form}}"]
 
 Error types: grammar_tense, grammar_article, grammar_preposition, grammar_word_order, vocabulary, pronunciation_note
 
 When the student uses a word from another topic area (e.g. cooking when topic is fishing), note it:
-[TOPIC_DISCOVERED: {discovered_topic}]"""
+[TOPIC_DISCOVERED: {{discovered_topic}}]"""
 
 
 # --- Post-session analysis prompt ---
