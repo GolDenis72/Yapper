@@ -34,14 +34,19 @@ class SessionTracker:
         """
         # Extract errors
         for match in ERROR_PATTERN.finditer(response):
-            error_type, original, correct = match.groups()
-            self.errors.append({
-                "ts": datetime.now().isoformat(),
-                "type": error_type,
-                "original": original,
-                "correct": correct,
-                "topic": self.topic,
-            })
+            try:
+                groups = match.groups()
+                if len(groups) >= 3:
+                    error_type, original, correct = groups[0], groups[1], groups[2]
+                    self.errors.append({
+                        "ts": datetime.now().isoformat(),
+                        "type": error_type,
+                        "original": original,
+                        "correct": correct,
+                        "topic": self.topic,
+                    })
+            except Exception:
+                pass
 
         # Extract discovered topics
         for match in TOPIC_PATTERN.finditer(response):
