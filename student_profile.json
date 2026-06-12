@@ -1,0 +1,22 @@
+{
+  "name": "Denis",
+  "native_language": "Russian",
+  "cefr_level": "B1",
+  "target_level": "B2",
+  "session_duration_minutes": 15,
+  "preferred_topics": [
+    "daily life",
+    "technology",
+    "news & current events"
+  ],
+  "professional_topics": [
+    "IT",
+    "buildings",
+    "physics"
+  ],
+  "created_at": "2026-06-11T16:40:35.373769",
+  "last_session_at": "2026-06-12T16:43:08.658730",
+  "total_sessions": 1,
+  "total_minutes": 4,
+  "assessment_done": true
+}

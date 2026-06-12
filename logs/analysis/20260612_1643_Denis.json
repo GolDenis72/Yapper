@@ -1,0 +1,7 @@
+{
+  "topic": "travel",
+  "date": "2026-06-12T16:43:11.557996",
+  "analysis": {
+    "raw": " {\n  \"session_summary\": \"Denis discussed his travel experiences and demonstrated some vocabulary gaps, particularly in the area of verb tense. He also showed interest in cooking as a topic.\",\n  \"errors_by_type\": {\n    \"grammar_tense\": [\"It sounds like you had a difficult time.\"],\n    \"vocabulary\": [\"I visit\"]\n  },\n  \"most_frequent_errors\": [\"Grammar tense errors\"],\n  \"vocabulary_to_learn\": [\"visited\", \"visiting\", \"visit\", \"cooking\", \"chef\", \"recipe\"],\n  \"discovered_topics\": [\"travel\", \""
+  }
+}
