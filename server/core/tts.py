@@ -4,7 +4,7 @@ import asyncio
 import tempfile
 import os
 import edge_tts
-from config.settings import TTS_VOICE, TTS_RATE, TTS_VOLUME
+from server.config.settings import TTS_VOICE, TTS_RATE, TTS_VOLUME
 
 
 async def _synthesize(text: str, output_path: str) -> None:
