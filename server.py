@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 
 from config.settings import SESSION_MAX_MINUTES, VOCAB_HOTKEY, BASE_DIR
 from core.stt import transcribe, ping as whisper_ping
-from core.tts import speak
+from core.tts import speak_async
 from core.llm import chat, ping as ollama_ping
 from pedagogy.student_profile import load as load_profile, exists as profile_exists
 from pedagogy.assessment import run_assessment
@@ -171,7 +171,7 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
     opening = (plan.get("opening_question") if plan else None) or get_random_question(topic)
     if opening:
         messages.append({"role": "assistant", "content": opening})
-        audio = speak(opening)
+        audio = await speak_async(opening)
         await send("assistant_message", {"text": opening, "audio": list(audio)})
 
     # Main loop
@@ -233,7 +233,7 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
 
             # TTS
             await send("status_text", {"text": "Speaking..."})
-            audio = speak(clean_response)
+            audio = await speak_async(clean_response)
             import base64 as b64
             await send("assistant_message", {
                 "text": clean_response,
@@ -296,7 +296,7 @@ async def run_ws_assessment(ws: WebSocket, send, profile: dict):
                     pass
 
         messages.append({"role": "assistant", "content": response})
-        audio = speak(response)
+        audio = await speak_async(response)
         import base64 as b64
         await send("assistant_message", {
             "text": response,
