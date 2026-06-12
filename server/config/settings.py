@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- Paths ---
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent  # project root: Yapper/Yapper/
 LOGS_DIR = BASE_DIR / "logs"
 ERRORS_DIR = LOGS_DIR / "errors"
 VOCAB_DIR = LOGS_DIR / "vocabulary"
