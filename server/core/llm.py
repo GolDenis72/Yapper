@@ -3,7 +3,7 @@
 import httpx
 import json
 from typing import Generator
-from config.settings import OLLAMA_URL, OLLAMA_MODEL, OLLAMA_MAX_TOKENS
+from server.config.settings import OLLAMA_URL, OLLAMA_MODEL, OLLAMA_MAX_TOKENS
 
 
 def chat(messages: list[dict], stream: bool = True) -> Generator[str, None, None] | str:
