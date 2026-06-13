@@ -7,7 +7,7 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 from pynput import keyboard
-from server.config.settings import (
+from config.settings import (
     AUDIO_SAMPLE_RATE,
     AUDIO_CHANNELS,
     SILENCE_THRESHOLD,

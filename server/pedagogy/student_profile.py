@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 from datetime import datetime
-from server.config.settings import BASE_DIR
+from config.settings import BASE_DIR
 
 PROFILE_PATH = BASE_DIR / "student_profile.json"
 

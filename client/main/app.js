@@ -273,6 +273,10 @@ $("btn-save-profile").onclick = () => {
   }));
 };
 
+document.getElementById('micTestBtn').addEventListener('click', () => {
+    window.open('/static/mictest/', 'mictest', 'width=900,height=700');
+});
+
 // F9 hotkey for vocab gap
 document.addEventListener("keydown", e => {
   if (e.key === "F9") {

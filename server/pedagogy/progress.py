@@ -3,7 +3,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from server.config.settings import ERRORS_DIR, BASE_DIR
+from config.settings import ERRORS_DIR, BASE_DIR
 
 PROGRESS_PATH = BASE_DIR / "logs" / "progress.json"
 
@@ -23,7 +23,7 @@ def record_monthly_test(student_name: str, result: dict) -> None:
 
 def get_progress_report(student_name: str) -> str:
     """Return a human-readable progress report."""
-    from server.pedagogy.student_profile import load as load_profile
+    from pedagogy.student_profile import load as load_profile
     profile = load_profile()
     log = _load_progress_log(student_name)
 
@@ -105,7 +105,7 @@ def get_session_streak(student_name: str) -> int:
 
 def print_quick_stats(student_name: str) -> None:
     """Print a short stats summary to terminal."""
-    from server.pedagogy.student_profile import load as load_profile
+    from pedagogy.student_profile import load as load_profile
     profile = load_profile()
     streak = get_session_streak(student_name)
 

@@ -1,13 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Yapper — Microphone Test</title>
-  <link rel="stylesheet" href="mictest.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapper — Microphone Test</title>
+    <link rel="stylesheet" href="mictest.css">
 </head>
 <body>
-  <h1>Microphone Test</h1>
-  <div id="app">Loading...</div>
-  <script src="mictest.js"></script>
+    <div class="container">
+        <h1>🎤 Настройка микрофона</h1>
+        <p class="subtitle">Пройдите эти шаги, чтобы улучшить распознавание речи</p>
+
+        <!-- Шаг 0: Loopback -->
+        <div class="step-card" id="step0">
+            <h2>Шаг 0. Слышать себя</h2>
+            <p class="warning">⚠️ Наденьте наушники перед включением!</p>
+            <button id="loopbackBtn" class="btn">🔊 Слышать себя</button>
+            <button id="stopLoopbackBtn" class="btn secondary" disabled>🔇 Выключить</button>
+            <div class="indicator-container">
+                <div class="indicator-label">Уровень громкости:</div>
+                <div class="indicator-bar" id="volumeBar">
+                    <div class="indicator-fill" id="volumeFill"></div>
+                </div>
+                <div class="indicator-zones">
+                    <span class="zone-low">🔵 Тихо</span>
+                    <span class="zone-good">🟢 Норма</span>
+                    <span class="zone-high">🔴 Громко</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Шаг 1: Фоновый шум -->
+        <div class="step-card" id="step1">
+            <h2>Шаг 1. Фоновый шум</h2>
+            <button id="recordNoiseBtn" class="btn">🎙️ Записать 3 секунды тишины</button>
+            <div id="noiseResult" class="result"></div>
+            <button class="btn skip" data-step="1">Пропустить</button>
+        </div>
+
+        <!-- Шаг 2: Громкость -->
+        <div class="step-card" id="step2">
+            <h2>Шаг 2. Громкость микрофона</h2>
+            <div class="live-indicator">
+                <div class="live-bar" id="liveVolumeBar">
+                    <div class="live-fill" id="liveVolumeFill"></div>
+                </div>
+            </div>
+            <div id="volumeAdvice" class="advice"></div>
+            <div class="instructions" id="volumeInstructions" style="display:none;">
+                <h3>📖 Инструкция по настройке:</h3>
+                <ol>
+                    <li>Откройте <strong>Параметры звука</strong> Windows (правый клик на значок динамика)</li>
+                    <li>Выберите <strong>Свойства устройства</strong> для вашего микрофона</li>
+                    <li>На вкладке <strong>Уровни</strong> переместите ползунок <strong>Микрофон</strong></li>
+                    <li>Добейтесь, чтобы индикатор выше показывал 🟢 зону</li>
+                    <li>Если громкости мало — добавьте <strong>Микрофон Boost</strong> (+10 или +20 dB)</li>
+                </ol>
+                <button id="checkVolumeBtn" class="btn small">✅ Я настроил, проверить</button>
+            </div>
+            <button class="btn skip" data-step="2">Пропустить</button>
+        </div>
+
+        <!-- Шаг 3: Тестовая фраза -->
+        <div class="step-card" id="step3">
+            <h2>Шаг 3. Проверка распознавания</h2>
+            <div class="test-phrase">
+                <p>Произнесите эту фразу:</p>
+                <div class="phrase" id="testPhrase">My name is ...</div>
+            </div>
+            <button id="recordPhraseBtn" class="btn">🎙️ Записать фразу</button>
+            <div id="phraseResult" class="result"></div>
+            <button class="btn skip" data-step="3">Пропустить</button>
+        </div>
+
+        <!-- Шаг 4: Сохранение -->
+        <div class="step-card" id="step4">
+            <h2>Шаг 4. Сохранить настройки</h2>
+            <button id="saveBtn" class="btn primary">💾 Сохранить настройки</button>
+            <button id="resetBtn" class="btn danger">🔄 Сбросить в дефолт</button>
+            <button id="closeBtn" class="btn secondary">❌ Закрыть</button>
+            <div id="saveResult" class="result"></div>
+        </div>
+    </div>
+
+    <script src="mictest.js"></script>
 </body>
 </html>

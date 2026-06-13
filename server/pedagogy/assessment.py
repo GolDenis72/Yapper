@@ -3,8 +3,8 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from server.core.llm import chat
-from server.config.settings import BASE_DIR
+from core.llm import chat
+from config.settings import BASE_DIR
 
 ASSESSMENT_LOG_PATH = BASE_DIR / "logs" / "assessment.json"
 

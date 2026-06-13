@@ -4,18 +4,18 @@ import sys
 import time
 from datetime import datetime
 
-from server.config.settings import SESSION_MAX_MINUTES, VOCAB_HOTKEY
-from server.core.audio import start_hotkey_listener, record_until_silence, play_audio, is_paused, pop_vocab_flag
-from server.core.stt import transcribe, ping as whisper_ping
-from server.core.tts import speak
-from server.core.llm import chat, ping as ollama_ping
-from server.pedagogy.student_profile import load as load_profile, create_interactive, exists as profile_exists, update_after_session, set_level
-from server.pedagogy.assessment import run_assessment
-from server.pedagogy.error_tracker import SessionTracker
-from server.pedagogy.lesson_planner import run_post_session_analysis, generate_lesson_plan, load_current_plan, format_plan_for_prompt
-from server.pedagogy.topics import suggest_topics, get_vocabulary, get_random_question
-from server.pedagogy.progress import get_progress_report, print_quick_stats
-from server.pedagogy.prompts import build_tutor_prompt
+from config.settings import SESSION_MAX_MINUTES, VOCAB_HOTKEY
+from core.audio import start_hotkey_listener, record_until_silence, play_audio, is_paused, pop_vocab_flag
+from core.stt import transcribe, ping as whisper_ping
+from core.tts import speak
+from core.llm import chat, ping as ollama_ping
+from pedagogy.student_profile import load as load_profile, create_interactive, exists as profile_exists, update_after_session, set_level
+from pedagogy.assessment import run_assessment
+from pedagogy.error_tracker import SessionTracker
+from pedagogy.lesson_planner import run_post_session_analysis, generate_lesson_plan, load_current_plan, format_plan_for_prompt
+from pedagogy.topics import suggest_topics, get_vocabulary, get_random_question
+from pedagogy.progress import get_progress_report, print_quick_stats
+from pedagogy.prompts import build_tutor_prompt
 
 
 def check_services() -> bool:
@@ -67,7 +67,7 @@ def run_session(profile: dict) -> None:
     plan_text = format_plan_for_prompt(plan)
 
     # Load context from previous sessions
-    from server.pedagogy.error_tracker import get_recurring_errors, load_discovered_topics
+    from pedagogy.error_tracker import get_recurring_errors, load_discovered_topics
     weak_points = get_recurring_errors(name)
     discovered_topics = load_discovered_topics(name)
 

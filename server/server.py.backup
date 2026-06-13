@@ -11,26 +11,26 @@ import wave
 import io
 
 from pathlib import Path
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from contextlib import asynccontextmanager
 
-from config.settings import SESSION_MAX_MINUTES, VOCAB_HOTKEY, BASE_DIR
-from core.stt import transcribe, ping as whisper_ping
-from core.tts import speak_async
-from core.llm import chat, ping as ollama_ping
-from pedagogy.student_profile import load as load_profile, exists as profile_exists
-from pedagogy.assessment import run_assessment
-from pedagogy.error_tracker import SessionTracker
-from pedagogy.lesson_planner import (
+from server.config.settings import SESSION_MAX_MINUTES, VOCAB_HOTKEY, BASE_DIR
+from server.core.stt import transcribe, ping as whisper_ping
+from server.core.tts import speak_async
+from server.core.llm import chat, ping as ollama_ping
+from server.pedagogy.student_profile import load as load_profile, exists as profile_exists
+from server.pedagogy.assessment import run_assessment
+from server.pedagogy.error_tracker import SessionTracker
+from server.pedagogy.lesson_planner import (
     run_post_session_analysis, generate_lesson_plan,
     load_current_plan, format_plan_for_prompt
 )
-from pedagogy.topics import suggest_topics, get_vocabulary, get_random_question, all_topic_names
-from pedagogy.progress import get_progress_report, print_quick_stats
-from pedagogy.prompts import build_tutor_prompt
-from pedagogy.student_profile import update_after_session, set_level, create_interactive
+from server.pedagogy.topics import suggest_topics, get_vocabulary, get_random_question, all_topic_names
+from server.pedagogy.progress import get_progress_report, print_quick_stats
+from server.pedagogy.prompts import build_tutor_prompt
+from server.pedagogy.student_profile import update_after_session, set_level, create_interactive
 
 
 app = FastAPI(title="Yapper")
@@ -83,6 +83,23 @@ async def root():
         return HTMLResponse(index_path.read_text())
     return HTMLResponse("<h1>Yapper starting...</h1>")
 
+@app.post("/api/mictest/noise")
+async def measure_noise(request: Request):
+    # ... код из предыдущего сообщения ...
+
+@app.post("/api/mictest/test_phrase")
+async def test_phrase(request: Request):
+    # ... код из предыдущего сообщения ...
+
+@app.post("/api/mictest/save")
+async def save_calibration(request: Request):
+    # ... код из предыдущего сообщения ...
+
+@app.post("/api/mictest/reset")
+async def reset_calibration(request: Request):
+    # ... код из предыдущего сообщения ...
+
+# --- WebSocket session ---
 @app.websocket("/ws")
 async def websocket_session(ws: WebSocket):
     await ws.accept()
@@ -109,7 +126,7 @@ async def websocket_session(ws: WebSocket):
 
             elif msg["type"] == "save_profile":
                 data = msg["data"]
-                from pedagogy.student_profile import save, DEFAULT_PROFILE
+                from server.pedagogy.student_profile import save, DEFAULT_PROFILE
                 from datetime import datetime
                 profile = DEFAULT_PROFILE.copy()
                 profile.update(data)
@@ -150,7 +167,7 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
     plan = load_current_plan(name)
     plan_text = format_plan_for_prompt(plan)
 
-    from pedagogy.error_tracker import get_recurring_errors, load_discovered_topics
+    from server.pedagogy.error_tracker import get_recurring_errors, load_discovered_topics
     weak_points = get_recurring_errors(name)
     discovered_topics = load_discovered_topics(name)
 
@@ -272,7 +289,7 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
 
 async def run_ws_assessment(ws: WebSocket, send, profile: dict):
     """Run assessment over WebSocket."""
-    from pedagogy.assessment import ASSESSMENT_PROMPT
+    from server.pedagogy.assessment import ASSESSMENT_PROMPT
     topics = ", ".join(profile.get("preferred_topics", [])[:3]) or "general topics"
     professional = ", ".join(profile.get("professional_topics", [])) or "none"
 
@@ -345,160 +362,3 @@ if __name__ == "__main__":
         ssl_certfile=args.ssl_certfile,
         ssl_keyfile=args.ssl_keyfile,
     )
-
-# ========== MICROPHONE TEST ENDPOINTS ==========
-
-@app.post("/api/mictest/noise")
-async def measure_noise(request: Request):
-    import base64
-    import numpy as np
-    import wave
-    import io
-    
-    data = await request.json()
-    audio_base64 = data.get("audio_base64")
-    
-    if not audio_base64:
-        raise HTTPException(status_code=400, detail="No audio data")
-    
-    # Декодируем base64 в байты
-    audio_bytes = base64.b64decode(audio_base64)
-    
-    # Простейшая конвертация (если не WAV, возвращаем заглушку)
-    try:
-        with io.BytesIO(audio_bytes) as wav_io:
-            with wave.open(wav_io, 'rb') as wav_file:
-                frames = wav_file.readframes(wav_file.getnframes())
-                audio_array = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
-    except:
-        return {"noise_db": -45, "level": "medium", "advice": "Используйте WAV аудио для точного измерения"}
-    
-    rms = np.sqrt(np.mean(audio_array**2))
-    rms_db = 20 * np.log10(rms + 1e-10)
-    
-    if rms_db < -50:
-        level = "low"
-        advice = "Отлично! Фоновый шум очень низкий."
-    elif rms_db < -35:
-        level = "medium"
-        advice = "Приемлемо, но шумодав на сервере поможет ещё лучше."
-    else:
-        level = "high"
-        advice = "Высокий уровень шума. Выключите вентилятор, закройте окно."
-    
-    return {
-        "noise_db": round(rms_db, 1),
-        "level": level,
-        "advice": advice
-    }
-
-
-@app.post("/api/mictest/test_phrase")
-async def test_phrase(request: Request):
-    import base64
-    
-    data = await request.json()
-    audio_base64 = data.get("audio_base64")
-    expected_text = data.get("expected_text")
-    
-    if not audio_base64 or not expected_text:
-        raise HTTPException(status_code=400, detail="Missing audio or expected text")
-    
-    # Декодируем
-    audio_bytes = base64.b64decode(audio_base64)
-    
-    # ВРЕМЕННО: заглушка для распознавания
-    # TODO: интегрировать реальный Whisper
-    transcribed = expected_text  # заглушка - считаем что распозналось идеально
-    
-    # Вычисляем WER
-    expected_words = expected_text.lower().split()
-    transcribed_words = transcribed.lower().split()
-    
-    matches = 0
-    i = 0
-    j = 0
-    while i < len(expected_words) and j < len(transcribed_words):
-        if expected_words[i] == transcribed_words[j]:
-            matches += 1
-            i += 1
-            j += 1
-        else:
-            i += 1
-            j += 1
-    
-    wer = (1 - matches / max(len(expected_words), 1)) * 100
-    
-    if wer == 0:
-        advice = "Отлично! Распознавание работает идеально."
-    elif wer < 20:
-        advice = "Хорошо. Можно улучшить, говоря чуть чётче."
-    elif wer < 50:
-        advice = "Средний результат. Проверьте уровень громкости и фоновый шум."
-    else:
-        advice = "Низкая точность. Настройте микрофон заново."
-    
-    return {
-        "transcribed": transcribed,
-        "wer": round(wer, 1),
-        "advice": advice
-    }
-
-
-@app.post("/api/mictest/save")
-async def save_calibration(request: Request):
-    import json
-    import os
-    
-    data = await request.json()
-    profile_name = data.get("profile_name")
-    calibration = data.get("calibration")
-    
-    if not profile_name or not calibration:
-        raise HTTPException(status_code=400, detail="Missing profile or calibration data")
-    
-    # Путь к файлу профиля
-    profile_path = f"student_profile.json"
-    
-    # Загружаем существующий профиль или создаём новый
-    if os.path.exists(profile_path):
-        with open(profile_path, 'r') as f:
-            profile = json.load(f)
-    else:
-        profile = {"name": profile_name}
-    
-    # Добавляем калибровку
-    profile["microphone_calibration"] = calibration
-    
-    # Сохраняем
-    with open(profile_path, 'w') as f:
-        json.dump(profile, f, indent=2)
-    
-    return {"status": "saved"}
-
-
-@app.post("/api/mictest/reset")
-async def reset_calibration(request: Request):
-    import json
-    import os
-    
-    data = await request.json()
-    profile_name = data.get("profile_name")
-    
-    if not profile_name:
-        raise HTTPException(status_code=400, detail="Missing profile name")
-    
-    profile_path = f"student_profile.json"
-    
-    if os.path.exists(profile_path):
-        with open(profile_path, 'r') as f:
-            profile = json.load(f)
-        
-        if "microphone_calibration" in profile:
-            del profile["microphone_calibration"]
-        
-        with open(profile_path, 'w') as f:
-            json.dump(profile, f, indent=2)
-    
-    return {"status": "reset"}
-

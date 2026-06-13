@@ -4,7 +4,7 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
-from server.config.settings import ERRORS_DIR, VOCAB_DIR
+from config.settings import ERRORS_DIR, VOCAB_DIR
 
 # --- Regex patterns to extract tags from model responses ---
 ERROR_PATTERN = re.compile(
