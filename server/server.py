@@ -350,42 +350,48 @@ if __name__ == "__main__":
 
 @app.post("/api/mictest/noise")
 async def measure_noise(request: Request):
-    import base64
-    import numpy as np
-    import wave
-    import io
-    
+    import soundfile as sf
+    import io as _io
+
     data = await request.json()
     audio_base64 = data.get("audio_base64")
-    
+
     if not audio_base64:
         raise HTTPException(status_code=400, detail="No audio data")
-    
-    # Декодируем base64 в байты
+
     audio_bytes = base64.b64decode(audio_base64)
-    
-    # Простейшая конвертация (если не WAV, возвращаем заглушку)
+
     try:
-        with io.BytesIO(audio_bytes) as wav_io:
-            with wave.open(wav_io, 'rb') as wav_file:
-                frames = wav_file.readframes(wav_file.getnframes())
-                audio_array = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
-    except:
-        return {"noise_db": -45, "level": "medium", "advice": "Используйте WAV аудио для точного измерения"}
-    
+        buf = _io.BytesIO(audio_bytes)
+        audio_array, _ = sf.read(buf, dtype="float32")
+    except Exception as e:
+        # fallback: try av (for webm/opus)
+        try:
+            import av
+            buf = _io.BytesIO(audio_bytes)
+            container = av.open(buf)
+            samples = []
+            for frame in container.decode(audio=0):
+                samples.append(frame.to_ndarray().flatten())
+            audio_array = np.concatenate(samples).astype(np.float32)
+            if audio_array.max() > 1.0:
+                audio_array /= 32768.0
+        except Exception as e2:
+            return {"noise_db": -99, "level": "unknown", "advice": f"Could not decode audio: {e2}"}
+
     rms = np.sqrt(np.mean(audio_array**2))
-    rms_db = 20 * np.log10(rms + 1e-10)
-    
+    rms_db = float(20 * np.log10(rms + 1e-10))
+
     if rms_db < -50:
         level = "low"
         advice = "Отлично! Фоновый шум очень низкий."
     elif rms_db < -35:
         level = "medium"
-        advice = "Приемлемо, но шумодав на сервере поможет ещё лучше."
+        advice = "Приемлемо. Шумодав поможет улучшить распознавание."
     else:
         level = "high"
         advice = "Высокий уровень шума. Выключите вентилятор, закройте окно."
-    
+
     return {
         "noise_db": round(rms_db, 1),
         "level": level,
@@ -407,9 +413,11 @@ async def test_phrase(request: Request):
     # Декодируем
     audio_bytes = base64.b64decode(audio_base64)
     
-    # ВРЕМЕННО: заглушка для распознавания
-    # TODO: интегрировать реальный Whisper
-    transcribed = expected_text  # заглушка - считаем что распозналось идеально
+    # Real Whisper transcription
+    try:
+        transcribed = transcribe(audio_bytes) or ""
+    except Exception as e:
+        transcribed = ""
     
     # Вычисляем WER
     expected_words = expected_text.lower().split()
