@@ -83,6 +83,20 @@ async def root():
         return HTMLResponse(index_path.read_text())
     return HTMLResponse("<h1>Yapper starting...</h1>")
 
+@app.get("/mictest")
+async def mictest():
+    path = BASE_DIR / "client" / "mictest" / "index.html"
+    if path.exists():
+        return HTMLResponse(path.read_text())
+    return HTMLResponse("<h1>Mictest not found</h1>", status_code=404)
+
+@app.get("/api/profile")
+async def api_profile():
+    if not profile_exists():
+        return {"name": "Student"}
+    p = load_profile()
+    return {"name": p.get("name", "Student")}
+
 @app.websocket("/ws")
 async def websocket_session(ws: WebSocket):
     await ws.accept()
