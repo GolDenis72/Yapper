@@ -31,9 +31,11 @@ from pedagogy.topics import suggest_topics, get_vocabulary, get_random_question,
 from pedagogy.progress import get_progress_report, print_quick_stats
 from pedagogy.prompts import build_tutor_prompt
 from pedagogy.student_profile import update_after_session, set_level, create_interactive
+from server.mictest_routes import router as mictest_router
 
 
 app = FastAPI(title="Yapper")
+app.include_router(mictest_router)
 
 # Mount static files
 STATIC_DIR = BASE_DIR / "client" / "main"
