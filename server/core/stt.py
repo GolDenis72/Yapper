@@ -4,7 +4,7 @@ import httpx
 import tempfile
 import os
 import asyncio
-from config.settings import WHISPER_URL, WHISPER_LANGUAGE
+from server.config.settings import WHISPER_URL, WHISPER_LANGUAGE
 
 
 def transcribe(audio_bytes: bytes, language: str = WHISPER_LANGUAGE) -> str:
