@@ -4,7 +4,7 @@ import base64
 import io
 import numpy as np
 from fastapi import APIRouter, Request, HTTPException
-from server.core.stt import transcribe
+from server.core.stt import transcribe_async as transcribe
 
 router = APIRouter(prefix="/api/mictest")
 
@@ -78,7 +78,7 @@ async def test_phrase(request: Request):
     audio_bytes = base64.b64decode(audio_base64)
 
     try:
-        transcribed = transcribe(audio_bytes) or ""
+        transcribed = await transcribe_async(audio_bytes) or ""
     except Exception as e:
         return {
             "transcribed": "",
