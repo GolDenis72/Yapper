@@ -161,7 +161,14 @@ async function startRecording() {
 
       const blob = new Blob(audioChunks, { type: "audio/webm" });
       const arrayBuffer = await blob.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      // Safe base64 encoding for large buffers (avoids stack overflow)
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = '';
+      const chunkSize = 8192;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+      }
+      const base64 = btoa(binary);
 
       micStatus.textContent = "Processing...";
       ws.send(JSON.stringify({ type: "audio_chunk", data: base64 }));
