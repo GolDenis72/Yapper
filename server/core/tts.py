@@ -8,6 +8,7 @@ from server.config.settings import TTS_VOICE, TTS_RATE, TTS_VOLUME
 
 
 async def _synthesize(text: str, output_path: str) -> None:
+    text = strip_emojis(text)
     communicate = edge_tts.Communicate(
         text=text,
         voice=TTS_VOICE,
@@ -15,6 +16,24 @@ async def _synthesize(text: str, output_path: str) -> None:
         volume=TTS_VOLUME,
     )
     await communicate.save(output_path)
+
+
+def strip_emojis(text: str) -> str:
+    """Remove emoji characters from text before TTS."""
+    import re
+    emoji_pattern = re.compile(
+        "["
+        u"\U0001F600-\U0001F64F"
+        u"\U0001F300-\U0001F5FF"
+        u"\U0001F680-\U0001F6FF"
+        u"\U0001F1E0-\U0001F1FF"
+        u"\U00002700-\U000027BF"
+        u"\U0001F900-\U0001F9FF"
+        u"\u2600-\u26FF"
+        u"\u2700-\u27BF"
+        "]+", flags=re.UNICODE
+    )
+    return emoji_pattern.sub("", text).strip()
 
 
 async def speak_async(text: str) -> bytes:
