@@ -17,7 +17,7 @@ from fastapi.responses import HTMLResponse
 from contextlib import asynccontextmanager
 
 from config.settings import SESSION_MAX_MINUTES, VOCAB_HOTKEY, BASE_DIR
-from core.stt import transcribe, ping as whisper_ping
+from core.stt import transcribe, transcribe_async, ping as whisper_ping
 from core.tts import speak_async
 from core.llm import chat, ping as ollama_ping
 from pedagogy.student_profile import load as load_profile, exists as profile_exists
@@ -235,7 +235,7 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
             audio_bytes = base64.b64decode(msg["data"])
 
             await send("status_text", {"text": "Transcribing..."})
-            user_text = transcribe(audio_bytes)
+            user_text = await transcribe_async(audio_bytes)
 
             if not user_text:
                 await send("status_text", {"text": "Could not understand. Try again."})
@@ -332,7 +332,7 @@ async def run_ws_assessment(ws: WebSocket, send, profile: dict):
             if msg["type"] == "audio_chunk":
                 import base64
                 audio_bytes = base64.b64decode(msg["data"])
-                user_text = transcribe(audio_bytes)
+                user_text = await transcribe_async(audio_bytes)
                 if user_text:
                     await send("user_message", {"text": user_text})
                     messages.append({"role": "user", "content": user_text})
@@ -431,7 +431,7 @@ async def test_phrase(request: Request):
     
     # Real Whisper transcription
     try:
-        transcribed = transcribe(audio_bytes) or ""
+        transcribed = await transcribe_async(audio_bytes) or ""
     except Exception as e:
         transcribed = ""
     
