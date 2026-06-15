@@ -97,9 +97,15 @@ async function handleMessage(msg) {
     case "assistant_message":
       addMessage("assistant", msg.text);
       if (msg.audio) {
+        yapperSpeaking = true;
+        btnMic.disabled = true;
+        btnMic.textContent = "🔇 Yapper is speaking...";
         await playAudio(msg.audio);
+        yapperSpeaking = false;
+        btnMic.disabled = false;
+        btnMic.textContent = "🎤 Hold to Speak";
       }
-      micStatus.textContent = "Your turn — hold the button to speak";
+      micStatus.textContent = "Your turn — hold the button or press Space";
       break;
 
     case "user_message":
@@ -244,7 +250,7 @@ btnStop.onclick = () => {
   ws.send(JSON.stringify({ type: "stop_session" }));
 };
 
-btnMic.addEventListener("mousedown", startRecording);
+btnMic.addEventListener("mousedown", e => { if (!yapperSpeaking) startRecording(); });
 btnMic.addEventListener("mouseup", stopRecording);
 btnMic.addEventListener("touchstart", e => { e.preventDefault(); startRecording(); });
 btnMic.addEventListener("touchend", stopRecording);
@@ -284,10 +290,26 @@ document.getElementById('micTestBtn').addEventListener('click', () => {
     window.open('/static/mictest/', 'mictest', 'width=900,height=700');
 });
 
-// F9 hotkey for vocab gap
+// Hotkeys
+let yapperSpeaking = false;
+
 document.addEventListener("keydown", e => {
   if (e.key === "F9") {
     ws.send(JSON.stringify({ type: "vocab_flag", context: lastUserText }));
+  }
+  // Space to start recording (only if session active and Yapper not speaking)
+  if (e.key === " " && sessionActive && !yapperSpeaking && !micArea.classList.contains("hidden")) {
+    e.preventDefault();
+    if (!mediaRecorder || mediaRecorder.state !== "recording") {
+      startRecording();
+    }
+  }
+});
+
+document.addEventListener("keyup", e => {
+  if (e.key === " " && mediaRecorder && mediaRecorder.state === "recording") {
+    e.preventDefault();
+    stopRecording();
   }
 });
 
