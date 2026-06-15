@@ -16,21 +16,21 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from contextlib import asynccontextmanager
 
-from config.settings import SESSION_MAX_MINUTES, VOCAB_HOTKEY, BASE_DIR
-from core.stt import transcribe, transcribe_async, ping as whisper_ping
-from core.tts import speak_async
-from core.llm import chat, ping as ollama_ping
-from pedagogy.student_profile import load as load_profile, exists as profile_exists
-from pedagogy.assessment import run_assessment
-from pedagogy.error_tracker import SessionTracker
-from pedagogy.lesson_planner import (
+from server.config.settings import SESSION_MAX_MINUTES, VOCAB_HOTKEY, BASE_DIR
+from server.core.stt import transcribe, transcribe_async, ping as whisper_ping
+from server.core.tts import speak_async
+from server.core.llm import chat, ping as ollama_ping
+from server.pedagogy.student_profile import load as load_profile, exists as profile_exists
+from server.pedagogy.assessment import run_assessment
+from server.pedagogy.error_tracker import SessionTracker
+from server.pedagogy.lesson_planner import (
     run_post_session_analysis, generate_lesson_plan,
     load_current_plan, format_plan_for_prompt
 )
-from pedagogy.topics import suggest_topics, get_vocabulary, get_random_question, all_topic_names
-from pedagogy.progress import get_progress_report, print_quick_stats
-from pedagogy.prompts import build_tutor_prompt
-from pedagogy.student_profile import update_after_session, set_level, create_interactive
+from server.pedagogy.topics import suggest_topics, get_vocabulary, get_random_question, all_topic_names
+from server.pedagogy.progress import get_progress_report, print_quick_stats
+from server.pedagogy.prompts import build_tutor_prompt
+from server.pedagogy.student_profile import update_after_session, set_level, create_interactive
 from server.mictest_routes import router as mictest_router
 
 
@@ -125,7 +125,7 @@ async def websocket_session(ws: WebSocket):
 
             elif msg["type"] == "save_profile":
                 data = msg["data"]
-                from pedagogy.student_profile import save, DEFAULT_PROFILE
+                from server.pedagogy.student_profile import save, DEFAULT_PROFILE
                 from datetime import datetime
                 profile = DEFAULT_PROFILE.copy()
                 profile.update(data)
@@ -166,7 +166,7 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
     plan = load_current_plan(name)
     plan_text = format_plan_for_prompt(plan)
 
-    from pedagogy.error_tracker import get_recurring_errors, load_discovered_topics
+    from server.pedagogy.error_tracker import get_recurring_errors, load_discovered_topics
     weak_points = get_recurring_errors(name)
     discovered_topics = load_discovered_topics(name)
 
@@ -288,7 +288,7 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
 
 async def run_ws_assessment(ws: WebSocket, send, profile: dict):
     """Run assessment over WebSocket."""
-    from pedagogy.assessment import ASSESSMENT_PROMPT
+    from server.pedagogy.assessment import ASSESSMENT_PROMPT
     topics = ", ".join(profile.get("preferred_topics", [])[:3]) or "general topics"
     professional = ", ".join(profile.get("professional_topics", [])) or "none"
 
