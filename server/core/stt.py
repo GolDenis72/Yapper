@@ -3,21 +3,21 @@
 import httpx
 import tempfile
 import os
+import asyncio
 from config.settings import WHISPER_URL, WHISPER_LANGUAGE
 
 
 def transcribe(audio_bytes: bytes, language: str = WHISPER_LANGUAGE) -> str:
     """
     Send raw audio bytes to Whisper server and get transcribed text.
-    audio_bytes: WAV audio data
-    Returns: transcribed text string
+    Sync version — use in non-async context only.
     """
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False, dir="/tmp") as f:
         f.write(audio_bytes)
         tmp_path = f.name
 
     try:
-        with httpx.Client(timeout=30.0) as client:
+        with httpx.Client(timeout=120.0) as client:  # 120s for long audio
             with open(tmp_path, "rb") as audio_file:
                 response = client.post(
                     f"{WHISPER_URL}/asr",
@@ -32,6 +32,15 @@ def transcribe(audio_bytes: bytes, language: str = WHISPER_LANGUAGE) -> str:
                 return response.text.strip()
     finally:
         os.unlink(tmp_path)
+
+
+async def transcribe_async(audio_bytes: bytes, language: str = WHISPER_LANGUAGE) -> str:
+    """
+    Async version — use inside FastAPI/WebSocket handlers.
+    Runs transcribe() in thread pool so it doesn't block the event loop.
+    """
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, transcribe, audio_bytes, language)
 
 
 def ping() -> bool:
