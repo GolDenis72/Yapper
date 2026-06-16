@@ -195,7 +195,8 @@ async def run_session(ws: WebSocket, send, topic_override: str = None):
     if opening:
         messages.append({"role": "assistant", "content": opening})
         audio = await speak_async(opening)
-        await send("assistant_message", {"text": opening, "audio": list(audio)})
+        import base64 as b64
+        await send("assistant_message", {"text": opening, "audio": b64.b64encode(audio).decode()})
 
     # Main loop
     while active:
