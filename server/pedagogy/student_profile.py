@@ -15,6 +15,7 @@ DEFAULT_PROFILE = {
     "session_duration_minutes": 20,
     "preferred_topics": [],
     "professional_topics": [],       # e.g. ["accounting", "finance", "fishing"]
+    "strictness": "balanced",        # "relaxed" / "balanced" / "strict"
     "created_at": None,
     "last_session_at": None,
     "total_sessions": 0,
