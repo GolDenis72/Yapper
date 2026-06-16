@@ -7,11 +7,12 @@ from pathlib import Path
 from server.config.settings import ERRORS_DIR, VOCAB_DIR
 
 # --- Regex patterns to extract tags from model responses ---
+# Tolerant patterns: LLM sometimes escapes underscores as markdown (\_)
 ERROR_PATTERN = re.compile(
-    r'\[ERROR:\s*type=(\w+),\s*original="([^"]+)",\s*correct="([^"]+)"\]'
+    r'\[ERROR:\s*type=(\w+),\s*original="([^"]+)",\s*correct="([^"]+)"(?:,\s*explained=(\w+))?\]'
 )
 TOPIC_PATTERN = re.compile(
-    r'\[TOPIC_DISCOVERED:\s*([^\]]+)\]'
+    r'\[TOPIC\\?_DISCOVERED:\s*([^\]]+)\]'
 )
 
 
@@ -55,8 +56,8 @@ class SessionTracker:
                 self.discovered_topics.append(topic)
 
         # Strip all tags from response
-        clean = ERROR_PATTERN.sub("", response)
-        clean = TOPIC_PATTERN.sub("", clean)
+        clean = re.sub(r'\[ERROR:.*?\]', '', response)
+        clean = re.sub(r'\[TOPIC\\?_DISCOVERED:.*?\]', '', clean)
         return clean.strip()
 
     def flag_vocab_gap(self, context: str, russian_word: str = "") -> None:
