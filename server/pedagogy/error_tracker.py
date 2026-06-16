@@ -7,12 +7,12 @@ from pathlib import Path
 from server.config.settings import ERRORS_DIR, VOCAB_DIR
 
 # --- Regex patterns to extract tags from model responses ---
-# Tolerant patterns: LLM sometimes escapes underscores as markdown (\_)
+# Unified <<LOG:...>> tag format — robust against markdown escaping
 ERROR_PATTERN = re.compile(
-    r'\[ERROR:\s*type=(\w+),\s*original="([^"]+)",\s*correct="([^"]+)"(?:,\s*explained=(\w+))?\]'
+    r'<<LOG:ERROR\|type=(\w+)\|original="([^"]*)"\|correct="([^"]*)"\|explained=(\w+)>>'
 )
 TOPIC_PATTERN = re.compile(
-    r'\[TOPIC\\?_DISCOVERED:\s*([^\]]+)\]'
+    r'<<LOG:TOPIC\|name="([^"]*)">>'
 )
 
 
@@ -36,28 +36,28 @@ class SessionTracker:
         # Extract errors
         for match in ERROR_PATTERN.finditer(response):
             try:
-                groups = match.groups()
-                if len(groups) >= 3:
-                    error_type, original, correct = groups[0], groups[1], groups[2]
-                    self.errors.append({
-                        "ts": datetime.now().isoformat(),
-                        "type": error_type,
-                        "original": original,
-                        "correct": correct,
-                        "topic": self.topic,
-                    })
+                error_type, original, correct, explained = match.groups()
+                self.errors.append({
+                    "ts": datetime.now().isoformat(),
+                    "type": error_type,
+                    "original": original,
+                    "correct": correct,
+                    "explained": explained.lower() == "true",
+                    "topic": self.topic,
+                })
             except Exception:
                 pass
 
         # Extract discovered topics
         for match in TOPIC_PATTERN.finditer(response):
             topic = match.group(1).strip()
-            if topic not in self.discovered_topics:
+            if topic and topic not in self.discovered_topics:
                 self.discovered_topics.append(topic)
 
-        # Strip all tags from response
-        clean = re.sub(r'\[ERROR:.*?\]', '', response)
-        clean = re.sub(r'\[TOPIC\\?_DISCOVERED:.*?\]', '', clean)
+        # Strip all <<LOG:...>> tags and the separator line, keep only spoken text
+        clean = re.sub(r'<<LOG:.*?>>', '', response, flags=re.DOTALL)
+        clean = re.sub(r'═{3,}.*?═{3,}', '', clean, flags=re.DOTALL)
+        clean = re.sub(r'HIDDEN LOGGING.*$', '', clean, flags=re.DOTALL)
         return clean.strip()
 
     def flag_vocab_gap(self, context: str, russian_word: str = "") -> None:
