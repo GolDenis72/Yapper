@@ -54,9 +54,11 @@ class SessionTracker:
             if topic and topic not in self.discovered_topics:
                 self.discovered_topics.append(topic)
 
-        # Strip all <<LOG:...>> tags and the separator line, keep only spoken text
+        # Strip all <<LOG:...>> tags (complete or incomplete) and separator lines
         clean = re.sub(r'<<LOG:.*?>>', '', response, flags=re.DOTALL)
-        clean = re.sub(r'═{3,}.*?═{3,}', '', clean, flags=re.DOTALL)
+        # Catch incomplete/truncated tags (model cut off mid-tag): anything from << onwards
+        clean = re.sub(r'<<.*$', '', clean, flags=re.DOTALL)
+        clean = re.sub(r'═{2,}.*$', '', clean, flags=re.DOTALL)
         clean = re.sub(r'HIDDEN LOGGING.*$', '', clean, flags=re.DOTALL)
         return clean.strip()
 
