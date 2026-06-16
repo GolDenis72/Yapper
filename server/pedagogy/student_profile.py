@@ -113,6 +113,33 @@ def set_level(cefr_level: str) -> None:
     print(f"\n[Yapper] Level set to {cefr_level}")
 
 
+def reset() -> None:
+    """Delete the current profile entirely. Next run will trigger fresh setup."""
+    if PROFILE_PATH.exists():
+        PROFILE_PATH.unlink()
+
+
+def set_level_manually(cefr_level: str) -> None:
+    """Manually override CEFR level without running assessment."""
+    valid = ["A1", "A2", "B1", "B2", "C1", "C2"]
+    if cefr_level not in valid:
+        raise ValueError(f"Invalid CEFR level: {cefr_level}. Must be one of {valid}")
+    profile = load()
+    profile["cefr_level"] = cefr_level
+    profile["assessment_done"] = True
+    save(profile)
+
+
+def update_strictness(level: str) -> None:
+    """Change strictness setting without resetting profile."""
+    valid = ["relaxed", "balanced", "strict"]
+    if level not in valid:
+        raise ValueError(f"Invalid strictness: {level}. Must be one of {valid}")
+    profile = load()
+    profile["strictness"] = level
+    save(profile)
+
+
 def summary() -> str:
     p = load()
     lines = [
