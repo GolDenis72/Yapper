@@ -272,6 +272,7 @@ $("btn-save-profile").onclick = () => {
   const duration = parseInt($("p-duration").value);
   const topics = $("p-topics").value.split(",").map(t => t.trim()).filter(Boolean);
   const prof = $("p-prof").value.split(",").map(t => t.trim()).filter(Boolean);
+  const strictness = $("p-strictness").value;
 
   ws.send(JSON.stringify({
     type: "save_profile",
@@ -280,6 +281,7 @@ $("btn-save-profile").onclick = () => {
       session_duration_minutes: duration,
       preferred_topics: topics.length ? topics : ["travel", "daily life", "technology"],
       professional_topics: prof,
+      strictness,
       native_language: "Russian",
       target_level: "B2",
     }
