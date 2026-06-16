@@ -71,6 +71,7 @@
           <button id="btn-start" class="btn-primary">▶ Start Session</button>
           <button id="btn-stop" class="btn-danger hidden">⏹ Stop Session</button>
           <button id="btn-progress" class="btn-secondary">📊 Progress</button>
+          <button id="btn-manage-profile" class="btn-secondary">⚙️ Manage Profile</button>
         </div>
         <div id="session-info" class="hidden">
           <span id="session-topic">Topic: —</span>
@@ -95,6 +96,37 @@
         <h3>Your Progress</h3>
         <pre id="progress-text"></pre>
         <button id="btn-close-progress" class="btn-secondary">Close</button>
+      </div>
+
+      <!-- Profile management panel -->
+      <div id="profile-mgmt-panel" class="panel hidden">
+        <h3>Manage Profile</h3>
+        <div class="form-group">
+          <label>CEFR Level (manual override):</label>
+          <select id="mgmt-level">
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+            <option value="C2">C2</option>
+          </select>
+          <button id="btn-set-level" class="btn-secondary">Update Level</button>
+        </div>
+        <div class="form-group">
+          <label>Correction strictness:</label>
+          <select id="mgmt-strictness">
+            <option value="relaxed">Relaxed</option>
+            <option value="balanced">Balanced</option>
+            <option value="strict">Strict</option>
+          </select>
+          <button id="btn-set-strictness" class="btn-secondary">Update Strictness</button>
+        </div>
+        <div class="form-group">
+          <label>Danger zone:</label>
+          <button id="btn-reset-profile" class="btn-danger">Reset Profile (start over)</button>
+        </div>
+        <button id="btn-close-mgmt" class="btn-secondary">Close</button>
       </div>
 
     </div>
