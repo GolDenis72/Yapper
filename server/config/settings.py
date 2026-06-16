@@ -21,7 +21,7 @@ WHISPER_LANGUAGE = os.getenv("WHISPER_LANGUAGE", "en")
 # --- LLM (Ollama) ---
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral:7b")
-OLLAMA_MAX_TOKENS = int(os.getenv("OLLAMA_MAX_TOKENS", "150"))  # short answers for conversation
+OLLAMA_MAX_TOKENS = int(os.getenv("OLLAMA_MAX_TOKENS", "220"))  # enough for MODE B correction + full sentence  # short answers for conversation
 
 # --- TTS (edge-tts) ---
 TTS_VOICE = os.getenv("TTS_VOICE", "en-GB-RyanNeural")  # British male, clear accent
