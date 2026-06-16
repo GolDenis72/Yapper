@@ -137,6 +137,27 @@ async def websocket_session(ws: WebSocket):
                 p = load_profile()
                 await send("progress", {"report": get_progress_report(p["name"])})
 
+            elif msg["type"] == "reset_profile":
+                from server.pedagogy.student_profile import reset
+                reset()
+                await send("profile_reset", {})
+
+            elif msg["type"] == "set_level":
+                from server.pedagogy.student_profile import set_level_manually
+                try:
+                    set_level_manually(msg["level"])
+                    await send("level_updated", {"level": msg["level"]})
+                except ValueError as e:
+                    await send("error", {"message": str(e)})
+
+            elif msg["type"] == "set_strictness":
+                from server.pedagogy.student_profile import update_strictness
+                try:
+                    update_strictness(msg["level"])
+                    await send("strictness_updated", {"level": msg["level"]})
+                except ValueError as e:
+                    await send("error", {"message": str(e)})
+
     except WebSocketDisconnect:
         pass
     except Exception as e:
