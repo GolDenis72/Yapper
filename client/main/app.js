@@ -32,6 +32,12 @@ const sessionTime  = $("session-time");
 const micArea    = $("mic-area");
 const progressPanel = $("progress-panel");
 const progressText  = $("progress-text");
+const btnManageProfile = $("btn-manage-profile");
+const profileMgmtPanel = $("profile-mgmt-panel");
+const btnCloseMgmt = $("btn-close-mgmt");
+const btnSetLevel = $("btn-set-level");
+const btnSetStrictness = $("btn-set-strictness");
+const btnResetProfile = $("btn-reset-profile");
 
 // --- WebSocket ---
 function connect() {
@@ -137,6 +143,19 @@ async function handleMessage(msg) {
     case "progress":
       progressText.textContent = msg.report;
       progressPanel.classList.remove("hidden");
+      break;
+
+    case "profile_reset":
+      addMessage("system", "Profile reset. Reloading...");
+      setTimeout(() => location.reload(), 1500);
+      break;
+
+    case "level_updated":
+      addMessage("system", `✅ Level manually set to ${msg.level}`);
+      break;
+
+    case "strictness_updated":
+      addMessage("system", `✅ Strictness set to ${msg.level}`);
       break;
 
     case "error":
@@ -265,6 +284,28 @@ btnProgress.onclick = () => {
 
 btnCloseProgress.onclick = () => {
   progressPanel.classList.add("hidden");
+};
+
+btnManageProfile.onclick = () => {
+  profileMgmtPanel.classList.remove("hidden");
+};
+
+btnCloseMgmt.onclick = () => {
+  profileMgmtPanel.classList.add("hidden");
+};
+
+btnSetLevel.onclick = () => {
+  ws.send(JSON.stringify({ type: "set_level", level: $("mgmt-level").value }));
+};
+
+btnSetStrictness.onclick = () => {
+  ws.send(JSON.stringify({ type: "set_strictness", level: $("mgmt-strictness").value }));
+};
+
+btnResetProfile.onclick = () => {
+  if (confirm("This will delete your profile and all settings. You will need to set up again. Continue?")) {
+    ws.send(JSON.stringify({ type: "reset_profile" }));
+  }
 };
 
 $("btn-save-profile").onclick = () => {
