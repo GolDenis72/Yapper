@@ -45,6 +45,14 @@
         <label>Professional / special topics:</label>
         <input type="text" id="p-prof" placeholder="IT, fishing, accounting">
       </div>
+      <div class="form-group">
+        <label>Correction strictness:</label>
+        <select id="p-strictness">
+          <option value="relaxed">Relaxed — only clear errors</option>
+          <option value="balanced" selected>Balanced — grammar + wrong words</option>
+          <option value="strict">Strict — also unnatural phrasing</option>
+        </select>
+      </div>
       <button id="btn-save-profile" class="btn-primary">Create Profile</button>
     </div>
 
